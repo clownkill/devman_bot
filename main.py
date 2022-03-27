@@ -16,7 +16,13 @@ headers = {
 }
 
 while True:
-    response = requests.get(long_polling_url, headers=headers)
-    response.raise_for_status()
-
+    try:
+        response = requests.get(long_polling_url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.ReadTimeout:
+        print('Нет ответа от сервера')
+        continue
+    except requests.exceptions.ConnectionError:
+        print('Отсутствует подключение к интернету')
+        continue
     pprint(response.json())
