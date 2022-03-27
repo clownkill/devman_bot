@@ -14,15 +14,18 @@ long_polling_url = 'https://dvmn.org/api/long_polling/'
 headers = {
     'Authorization': f'Token {devman_token}',
 }
+params = {}
 
 while True:
     try:
-        response = requests.get(long_polling_url, headers=headers)
+        response = requests.get(long_polling_url, params=params, headers=headers)
         response.raise_for_status()
+        params['timestamp'] = response.json()['new_attempts'][0]['timestamp']
     except requests.exceptions.ReadTimeout:
         print('Нет ответа от сервера')
         continue
     except requests.exceptions.ConnectionError:
         print('Отсутствует подключение к интернету')
         continue
+
     pprint(response.json())
