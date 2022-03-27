@@ -57,7 +57,6 @@ def check_devman_lesson_result(devman_token, telegram_token, chat_id):
         )
 
 
-
 def main():
     load_dotenv()
 
@@ -70,6 +69,7 @@ def main():
         telegram_token=telegram_token,
         chat_id=chat_id
     )
+
 
 if __name__ == '__main__':
     main()
