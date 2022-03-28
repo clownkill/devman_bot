@@ -5,13 +5,13 @@ import telegram
 from dotenv import load_dotenv
 
 
-def send_checking_result(telegram_token, telegram_chat_id, devman_information_from_api):
+def send_checking_result(telegram_token, telegram_chat_id, last_checking_attempt):
     bot = telegram.Bot(token=telegram_token)
 
-    lesson_title = devman_information_from_api['new_attempts'][0]['lesson_title']
-    lesson_url = devman_information_from_api['new_attempts'][0]['lesson_url']
+    lesson_title = last_checking_attempt['lesson_title']
+    lesson_url = last_checking_attempt['lesson_url']
 
-    if not devman_information_from_api['new_attempts'][0]['is_negative']:
+    if not last_checking_attempt['is_negative']:
         bot.send_message(
             text=f'У вас проверили работу "{lesson_title}". \n\n'
                  f'Преподователю все понравилось, можно приступать к следующему уроку!'
@@ -39,9 +39,7 @@ def check_devman_lesson_result(devman_token, telegram_token, telegram_chat_id):
             response = requests.get(long_polling_url, params=params, headers=headers)
             response.raise_for_status()
             devman_information_from_api = response.json()
-            if devman_information_from_api['status'] != 'timeout':
-                params['timestamp'] = devman_information_from_api['new_attempts'][0]['timestamp']
-            else:
+            if devman_information_from_api['status'] == 'timeout':
                 continue
         except requests.exceptions.ReadTimeout:
             print('Нет ответа от сервера')
@@ -50,10 +48,13 @@ def check_devman_lesson_result(devman_token, telegram_token, telegram_chat_id):
             print('Отсутствует подключение к интернету')
             continue
 
+        last_checking_attempt = devman_information_from_api['new_attempts'][0]
+        params['timestamp'] = last_checking_attempt['timestamp']
+
         send_checking_result(
             telegram_token=telegram_token,
             telegram_chat_id=telegram_chat_id,
-            devman_information_from_api=devman_information_from_api
+            last_checking_attempt=last_checking_attempt
         )
 
 
