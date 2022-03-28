@@ -1,4 +1,5 @@
 import os
+from textwrap import dedent
 
 import requests
 import telegram
@@ -10,17 +11,27 @@ def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
     lesson_url = last_checking_attempt['lesson_url']
 
     if not last_checking_attempt['is_negative']:
+        message_text = f'''
+        У вас проверили работу "{lesson_title}".
+        
+        Преподователю все понравилось, можно приступать к следующему уроку!
+        
+        {lesson_url}
+        '''
         telegram_bot.send_message(
-            text=f'У вас проверили работу "{lesson_title}". \n\n'
-                 f'Преподователю все понравилось, можно приступать к следующему уроку!'
-                 f'Ссылка на урок: {lesson_url}',
+            text=dedent(message_text),
             chat_id=telegram_chat_id
         )
     else:
+        message_text = f'''
+        У вас проверили работу "{lesson_title}"
+
+        К сожалению в работе нашлись ошибки.
+
+        {lesson_url}
+        '''
         telegram_bot.send_message(
-            text=f'У вас проверили работу "{lesson_title}".\n\n'
-                 f'К сожалению в работе нашлись ошибки.\n\n'
-                 f'{lesson_url}',
+            text=dedent(message_text),
             chat_id=telegram_chat_id
         )
 
