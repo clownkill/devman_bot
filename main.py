@@ -1,33 +1,44 @@
 import os
+from datetime import datetime as dt
+from textwrap import dedent
+from time import sleep
 
 import requests
 import telegram
 from dotenv import load_dotenv
 
 
-def send_checking_result(telegram_token, chat_id, devman_response_json):
-    bot = telegram.Bot(token=telegram_token)
+def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
+    lesson_title = last_checking_attempt['lesson_title']
+    lesson_url = last_checking_attempt['lesson_url']
 
-    lesson_title = devman_response_json['new_attempts'][0]['lesson_title']
-    lesson_url = devman_response_json['new_attempts'][0]['lesson_url']
-
-    if not devman_response_json['new_attempts'][0]['is_negative']:
-        bot.send_message(
-            text=f'У вас проверили работу "{lesson_title}". \n\n'
-                 f'Преподователю все понравилось, можно приступать к следующему уроку!'
-                 f'Ссылка на урок: {lesson_url}',
-            chat_id=chat_id
+    if not last_checking_attempt['is_negative']:
+        message_text = f'''
+        У вас проверили работу "{lesson_title}".
+        
+        Преподователю все понравилось, можно приступать к следующему уроку!
+        
+        {lesson_url}
+        '''
+        telegram_bot.send_message(
+            text=dedent(message_text),
+            chat_id=telegram_chat_id
         )
     else:
-        bot.send_message(
-            text=f'У вас проверили работу "{lesson_title}".\n\n'
-                 f'К сожалению в работе нашлись ошибки.\n\n'
-                 f'{lesson_url}',
-            chat_id=chat_id
+        message_text = f'''
+        У вас проверили работу "{lesson_title}"
+
+        К сожалению в работе нашлись ошибки.
+
+        {lesson_url}
+        '''
+        telegram_bot.send_message(
+            text=dedent(message_text),
+            chat_id=telegram_chat_id
         )
 
 
-def check_devman_lesson_result(devman_token, telegram_token, chat_id):
+def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, time_to_sleep=60):
     long_polling_url = 'https://dvmn.org/api/long_polling/'
     headers = {
         'Authorization': f'Token {devman_token}',
@@ -38,23 +49,23 @@ def check_devman_lesson_result(devman_token, telegram_token, chat_id):
         try:
             response = requests.get(long_polling_url, params=params, headers=headers)
             response.raise_for_status()
-            devman_response_json = response.json()
-            if devman_response_json['status'] != 'timeout':
-                params['timestamp'] = response.json()['new_attempts'][0]['timestamp']
-            else:
-                continue
+            lessons_rewiews = response.json()
         except requests.exceptions.ReadTimeout:
-            print('Нет ответа от сервера')
             continue
         except requests.exceptions.ConnectionError:
-            print('Отсутствует подключение к интернету')
-            continue
+            sleep(time_to_sleep)
 
-        send_checking_result(
-            telegram_token=telegram_token,
-            chat_id=chat_id,
-            devman_response_json=devman_response_json
-        )
+        if lessons_rewiews['status'] == 'timeout':
+            params['timestamp'] = lessons_rewiews['timestamp_to_request']
+        else:
+            last_checking_attempt = lessons_rewiews['new_attempts'][0]
+            params['timestamp'] = lessons_rewiews['last_attempt_timestamp']
+
+            send_checking_result(
+                telegram_bot=telegram_bot,
+                telegram_chat_id=telegram_chat_id,
+                last_checking_attempt=last_checking_attempt
+            )
 
 
 def main():
@@ -62,12 +73,17 @@ def main():
 
     devman_token = os.getenv('DEVMAN_TOKEN')
     telegram_token = os.getenv('TELEGRAM_TOKEN')
-    chat_id = os.getenv('CHAT_ID')
+    telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+
+    bot = telegram.Bot(telegram_token)
+
+    time_to_sleep = 60
 
     check_devman_lesson_result(
         devman_token=devman_token,
-        telegram_token=telegram_token,
-        chat_id=chat_id
+        telegram_bot=bot,
+        telegram_chat_id=telegram_chat_id,
+        time_to_sleep=time_to_sleep
     )
 
 

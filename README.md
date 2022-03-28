@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ```
 DEVMAN_TOKEN=[TOKEN]
 TELEGRAM_TOKEN=[TOKEN]
-CHAT_ID=[ID]
+TELEGRAM_CHAT_ID=[ID]
 ```
 В переменной `DEVMAN_TOKEN` хранится API-токен, полученный от [dvmn.org](https://dvmn.org/api/docs/).
 
