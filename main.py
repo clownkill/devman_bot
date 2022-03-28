@@ -1,6 +1,7 @@
 import os
 from datetime import datetime as dt
 from textwrap import dedent
+from time import sleep
 
 import requests
 import telegram
@@ -37,7 +38,7 @@ def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
         )
 
 
-def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id):
+def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, time_to_sleep=60):
     long_polling_url = 'https://dvmn.org/api/long_polling/'
     headers = {
         'Authorization': f'Token {devman_token}',
@@ -50,11 +51,9 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id):
             response.raise_for_status()
             decoded_response = response.json()
         except requests.exceptions.ReadTimeout:
-            print('Нет ответа от сервера')
             continue
         except requests.exceptions.ConnectionError:
-            print('Отсутствует подключение к интернету')
-            continue
+            sleep(time_to_sleep)
 
         if decoded_response['status'] == 'timeout':
             params['timestamp'] = decoded_response['timestamp_to_request']
@@ -78,10 +77,13 @@ def main():
 
     bot = telegram.Bot(telegram_token)
 
+    time_to_sleep = 60
+
     check_devman_lesson_result(
         devman_token=devman_token,
-        telegram_bot = bot,
-        telegram_chat_id=telegram_chat_id
+        telegram_bot=bot,
+        telegram_chat_id=telegram_chat_id,
+        time_to_sleep=time_to_sleep
     )
 
 
