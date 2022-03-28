@@ -1,5 +1,4 @@
 import os
-from datetime import datetime as dt
 from textwrap import dedent
 from time import sleep
 
@@ -49,23 +48,22 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
         try:
             response = requests.get(long_polling_url, params=params, headers=headers)
             response.raise_for_status()
-            lessons_rewiews = response.json()
+            lessons_review = response.json()
+            if lessons_review['status'] == 'timeout':
+                params['timestamp'] = lessons_review['timestamp_to_request']
+            else:
+                last_checking_attempt = lessons_review['new_attempts'][0]
+                params['timestamp'] = lessons_review['last_attempt_timestamp']
+
+                send_checking_result(
+                    telegram_bot=telegram_bot,
+                    telegram_chat_id=telegram_chat_id,
+                    last_checking_attempt=last_checking_attempt
+                )
         except requests.exceptions.ReadTimeout:
             continue
         except requests.exceptions.ConnectionError:
             sleep(time_to_sleep)
-
-        if lessons_rewiews['status'] == 'timeout':
-            params['timestamp'] = lessons_rewiews['timestamp_to_request']
-        else:
-            last_checking_attempt = lessons_rewiews['new_attempts'][0]
-            params['timestamp'] = lessons_rewiews['last_attempt_timestamp']
-
-            send_checking_result(
-                telegram_bot=telegram_bot,
-                telegram_chat_id=telegram_chat_id,
-                last_checking_attempt=last_checking_attempt
-            )
 
 
 def main():
