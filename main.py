@@ -40,7 +40,7 @@ def check_devman_lesson_result(devman_token, telegram_token, telegram_chat_id):
             response.raise_for_status()
             devman_information_from_api = response.json()
             if devman_information_from_api['status'] != 'timeout':
-                params['timestamp'] = response.json()['new_attempts'][0]['timestamp']
+                params['timestamp'] = devman_information_from_api['new_attempts'][0]['timestamp']
             else:
                 continue
         except requests.exceptions.ReadTimeout:
