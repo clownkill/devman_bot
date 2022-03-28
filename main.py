@@ -1,4 +1,5 @@
 import os
+from datetime import datetime as dt
 from textwrap import dedent
 
 import requests
@@ -59,7 +60,7 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id):
             params['timestamp'] = decoded_response['timestamp_to_request']
         else:
             last_checking_attempt = decoded_response['new_attempts'][0]
-            params['timestamp'] = last_checking_attempt['timestamp']
+            params['timestamp'] = dt.timestamp(dt.now())
 
             send_checking_result(
                 telegram_bot=telegram_bot,
