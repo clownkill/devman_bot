@@ -49,16 +49,16 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
         try:
             response = requests.get(long_polling_url, params=params, headers=headers)
             response.raise_for_status()
-            decoded_response = response.json()
+            lessons_rewiews = response.json()
         except requests.exceptions.ReadTimeout:
             continue
         except requests.exceptions.ConnectionError:
             sleep(time_to_sleep)
 
-        if decoded_response['status'] == 'timeout':
-            params['timestamp'] = decoded_response['timestamp_to_request']
+        if lessons_rewiews['status'] == 'timeout':
+            params['timestamp'] = lessons_rewiews['timestamp_to_request']
         else:
-            last_checking_attempt = decoded_response['new_attempts'][0]
+            last_checking_attempt = lessons_rewiews['new_attempts'][0]
             params['timestamp'] = dt.timestamp(dt.now())
 
             send_checking_result(
