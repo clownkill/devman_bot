@@ -69,9 +69,9 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
 def main():
     load_dotenv()
 
-    devman_token = os.getenv('DEVMAN_TOKEN')
-    telegram_token = os.getenv('TELEGRAM_TOKEN')
-    telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+    devman_token = os.environ['DEVMAN_TOKEN']
+    telegram_token = os.environ['TELEGRAM_TOKEN']
+    telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
 
     bot = telegram.Bot(telegram_token)
 
