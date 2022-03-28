@@ -5,13 +5,13 @@ import telegram
 from dotenv import load_dotenv
 
 
-def send_checking_result(telegram_token, telegram_chat_id, devman_response_json):
+def send_checking_result(telegram_token, telegram_chat_id, devman_information_from_api):
     bot = telegram.Bot(token=telegram_token)
 
-    lesson_title = devman_response_json['new_attempts'][0]['lesson_title']
-    lesson_url = devman_response_json['new_attempts'][0]['lesson_url']
+    lesson_title = devman_information_from_api['new_attempts'][0]['lesson_title']
+    lesson_url = devman_information_from_api['new_attempts'][0]['lesson_url']
 
-    if not devman_response_json['new_attempts'][0]['is_negative']:
+    if not devman_information_from_api['new_attempts'][0]['is_negative']:
         bot.send_message(
             text=f'У вас проверили работу "{lesson_title}". \n\n'
                  f'Преподователю все понравилось, можно приступать к следующему уроку!'
@@ -38,8 +38,8 @@ def check_devman_lesson_result(devman_token, telegram_token, telegram_chat_id):
         try:
             response = requests.get(long_polling_url, params=params, headers=headers)
             response.raise_for_status()
-            devman_response_json = response.json()
-            if devman_response_json['status'] != 'timeout':
+            devman_information_from_api = response.json()
+            if devman_information_from_api['status'] != 'timeout':
                 params['timestamp'] = response.json()['new_attempts'][0]['timestamp']
             else:
                 continue
@@ -53,7 +53,7 @@ def check_devman_lesson_result(devman_token, telegram_token, telegram_chat_id):
         send_checking_result(
             telegram_token=telegram_token,
             telegram_chat_id=telegram_chat_id,
-            devman_response_json=devman_response_json
+            devman_information_from_api=devman_information_from_api
         )
 
 
