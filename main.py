@@ -59,7 +59,7 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
             params['timestamp'] = lessons_rewiews['timestamp_to_request']
         else:
             last_checking_attempt = lessons_rewiews['new_attempts'][0]
-            params['timestamp'] = dt.timestamp(dt.now())
+            params['timestamp'] = lessons_rewiews['last_attempt_timestamp']
 
             send_checking_result(
                 telegram_bot=telegram_bot,
