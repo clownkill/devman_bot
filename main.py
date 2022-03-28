@@ -48,23 +48,24 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id):
             response = requests.get(long_polling_url, params=params, headers=headers)
             response.raise_for_status()
             devman_information_from_api = response.json()
-            if devman_information_from_api['status'] == 'timeout':
-                continue
         except requests.exceptions.ReadTimeout:
             print('Нет ответа от сервера')
             continue
         except requests.exceptions.ConnectionError:
             print('Отсутствует подключение к интернету')
             continue
+            
+        if devman_information_from_api['status'] == 'timeout':
+            params['timestamp'] = devman_information_from_api['timestamp_to_request']
+        else:
+            last_checking_attempt = devman_information_from_api['new_attempts'][0]
+            params['timestamp'] = last_checking_attempt['timestamp']
 
-        last_checking_attempt = devman_information_from_api['new_attempts'][0]
-        params['timestamp'] = last_checking_attempt['timestamp']
-
-        send_checking_result(
-            telegram_bot=telegram_bot,
-            telegram_chat_id=telegram_chat_id,
-            last_checking_attempt=last_checking_attempt
-        )
+            send_checking_result(
+                telegram_bot=telegram_bot,
+                telegram_chat_id=telegram_chat_id,
+                last_checking_attempt=last_checking_attempt
+            )
 
 
 def main():
