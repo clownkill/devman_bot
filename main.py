@@ -1,3 +1,4 @@
+import logging
 import os
 from textwrap import dedent
 from time import sleep
@@ -6,6 +7,12 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
+logging.getLogger(__name__)
 
 def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
     lesson_title = last_checking_attempt['lesson_title']
@@ -67,6 +74,7 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
 
 
 def main():
+    logging.INFO('Бот запущен')
     load_dotenv()
 
     devman_token = os.environ['DEVMAN_TOKEN']
