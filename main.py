@@ -7,6 +7,8 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
+logger = logging.getLogger(__name__)
+
 
 class TelegramLogsHandler(logging.Handler):
 
@@ -89,6 +91,11 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, log
         except requests.exceptions.ConnectionError:
             logger.warning('Проблемы с подключением к интернету')
             sleep(time_to_sleep)
+        except KeyboardInterrupt:
+            logger.info('Бот остановлен')
+        except Exception as err:
+            logger.error('Бот упал с ошибкой:')
+            logger.error(err, exc_info=True)
 
 
 def main():
@@ -102,25 +109,17 @@ def main():
 
     time_to_sleep = 60
 
-    logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logger.addHandler(TelegramLogsHandler(bot, telegram_chat_id))
 
     logger.info('Бот запущен')
-    while True:
-        try:
-            check_devman_lesson_result(
-                devman_token=devman_token,
-                telegram_bot=bot,
-                telegram_chat_id=telegram_chat_id,
-                logger=logger,
-                time_to_sleep=time_to_sleep
-            )
-        except KeyboardInterrupt:
-            logger.info('Бот остановлен')
-        except Exception as err:
-            logger.error('Бот упал с ошибкой:')
-            logger.error(err, exc_info=True)
+    check_devman_lesson_result(
+        devman_token=devman_token,
+        telegram_bot=bot,
+        telegram_chat_id=telegram_chat_id,
+        logger=logger,
+        time_to_sleep=time_to_sleep
+    )
 
 
 if __name__ == '__main__':
