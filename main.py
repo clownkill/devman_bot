@@ -71,8 +71,8 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
         except requests.exceptions.ConnectionError:
             logging.warning('Проблемы с подключением к интернету')
             sleep(time_to_sleep)
-        except Exception:
-            logging.exception()
+        except Exception as err:
+            logging.error(err, exc_info=True)
 
 
 def main():
