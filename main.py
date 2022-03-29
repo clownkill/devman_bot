@@ -8,11 +8,22 @@ import telegram
 from dotenv import load_dotenv
 
 
-logging.basicConfig(
-    format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
-    level=logging.INFO
-)
-logging.getLogger(__name__)
+class TelegramLogsHandler(logging.Handler):
+
+    def __init__(self, bot, telegram_chat_id):
+        super().__init__()
+        formatter = "%(asctime)s : %(name)s : %(levelname)s : %(message)s"
+        self.setFormatter(formatter)
+        self.telegram_chat_id = telegram_chat_id
+        self.bot = bot
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.bot.send_message(
+            chat_id=self.telegram_chat_id,
+            text=log_entry
+        )
+
 
 def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
     lesson_title = last_checking_attempt['lesson_title']
@@ -74,7 +85,6 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
 
 
 def main():
-    logging.info('Бот запущен')
     load_dotenv()
 
     devman_token = os.environ['DEVMAN_TOKEN']
@@ -84,6 +94,12 @@ def main():
     bot = telegram.Bot(telegram_token)
 
     time_to_sleep = 60
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(TelegramLogsHandler(bot, telegram_chat_id))
+
+    logging.info('Бот запущен')
 
     check_devman_lesson_result(
         devman_token=devman_token,
@@ -95,3 +111,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
