@@ -96,7 +96,7 @@ def main():
     time_to_sleep = 60
 
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     logger.addHandler(TelegramLogsHandler(bot, telegram_chat_id))
 
     logging.info('Бот запущен')
@@ -111,4 +111,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
