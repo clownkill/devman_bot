@@ -12,6 +12,12 @@ class TelegramLogsHandler(logging.Handler):
 
     def __init__(self, bot, telegram_chat_id):
         super().__init__()
+        err_message_text = '''%(asctime)s - %(name)s - %(levelname)s:
+        
+        %(message)s
+        '''
+        formatter = logging.Formatter(dedent(err_message_text))
+        self.setFormatter(formatter)
         self.telegram_chat_id = telegram_chat_id
         self.bot = bot
 
@@ -53,7 +59,7 @@ def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
         )
 
 
-def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, time_to_sleep=60):
+def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, logger, time_to_sleep=60):
     long_polling_url = 'https://dvmn.org/api/long_polling/'
     headers = {
         'Authorization': f'Token {devman_token}',
@@ -62,15 +68,27 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
 
     while True:
         try:
-            0/0
+            response = requests.get(long_polling_url, params=params, headers=headers)
+            response.raise_for_status()
+            lessons_review = response.json()
+            if lessons_review['status'] == 'timeout':
+                params['timestamp'] = lessons_review['timestamp_to_request']
+            else:
+                last_checking_attempt = lessons_review['new_attempts'][0]
+                params['timestamp'] = lessons_review['last_attempt_timestamp']
+
+                logging.info('Бот запущен')
+                send_checking_result(
+                    telegram_bot=telegram_bot,
+                    telegram_chat_id=telegram_chat_id,
+                    last_checking_attempt=last_checking_attempt
+                )
         except requests.exceptions.ReadTimeout:
-            logging.warning('Нет ответа от сервера')
+            logger.warning('Нет ответа от сервера')
             continue
         except requests.exceptions.ConnectionError:
-            logging.warning('Проблемы с подключением к интернету')
+            logger.warning('Проблемы с подключением к интернету')
             sleep(time_to_sleep)
-        except Exception as err:
-            logging.error(err, exc_info=True)
 
 
 def main():
@@ -88,12 +106,21 @@ def main():
     logger.setLevel(logging.INFO)
     logger.addHandler(TelegramLogsHandler(bot, telegram_chat_id))
 
-    check_devman_lesson_result(
-        devman_token=devman_token,
-        telegram_bot=bot,
-        telegram_chat_id=telegram_chat_id,
-        time_to_sleep=time_to_sleep
-    )
+    logger.info('Бот запущен')
+    while True:
+        try:
+            check_devman_lesson_result(
+                devman_token=devman_token,
+                telegram_bot=bot,
+                telegram_chat_id=telegram_chat_id,
+                logger=logger,
+                time_to_sleep=time_to_sleep
+            )
+        except KeyboardInterrupt:
+            logger.info('Бот остановлен')
+        except Exception as err:
+            logger.error('Бот упал с ошибкой:')
+            logger.error(err, exc_info=True)
 
 
 if __name__ == '__main__':
