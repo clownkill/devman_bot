@@ -74,7 +74,7 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
 
 
 def main():
-    logging.INFO('Бот запущен')
+    logging.info('Бот запущен')
     load_dotenv()
 
     devman_token = os.environ['DEVMAN_TOKEN']
