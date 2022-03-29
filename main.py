@@ -56,6 +56,7 @@ def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
 
 
 def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, time_to_sleep=60):
+    logging.info('Бот запущен')
     long_polling_url = 'https://dvmn.org/api/long_polling/'
     headers = {
         'Authorization': f'Token {devman_token}',
@@ -79,8 +80,10 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
                     last_checking_attempt=last_checking_attempt
                 )
         except requests.exceptions.ReadTimeout:
+            logging.warning('Нет ответа от сервера')
             continue
         except requests.exceptions.ConnectionError:
+            logging.warning('Проблемы с подключением к интернету')
             sleep(time_to_sleep)
 
 
@@ -98,8 +101,6 @@ def main():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logger.addHandler(TelegramLogsHandler(bot, telegram_chat_id))
-
-    logging.info('Бот запущен')
 
     check_devman_lesson_result(
         devman_token=devman_token,
