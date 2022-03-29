@@ -12,8 +12,6 @@ class TelegramLogsHandler(logging.Handler):
 
     def __init__(self, bot, telegram_chat_id):
         super().__init__()
-        formatter = "%(asctime)s : %(name)s : %(levelname)s : %(message)s"
-        self.setFormatter(formatter)
         self.telegram_chat_id = telegram_chat_id
         self.bot = bot
 
