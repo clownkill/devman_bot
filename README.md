@@ -31,6 +31,10 @@ TELEGRAM_CHAT_ID=[ID]
 python main.py
 ```
 
+### Деплой
+
+Для деплоя проекта необходимо воспользоваться инструкцией на [heroku](https://devcenter.heroku.com/categories/deployment).
+
 ### Цель проекта
 
 Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [dvmn.org](https://dvmn.org).
