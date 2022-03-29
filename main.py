@@ -56,7 +56,6 @@ def send_checking_result(telegram_bot, telegram_chat_id, last_checking_attempt):
 
 
 def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, time_to_sleep=60):
-    logging.info('Бот запущен')
     long_polling_url = 'https://dvmn.org/api/long_polling/'
     headers = {
         'Authorization': f'Token {devman_token}',
@@ -65,26 +64,15 @@ def check_devman_lesson_result(devman_token, telegram_bot, telegram_chat_id, tim
 
     while True:
         try:
-            response = requests.get(long_polling_url, params=params, headers=headers)
-            response.raise_for_status()
-            lessons_review = response.json()
-            if lessons_review['status'] == 'timeout':
-                params['timestamp'] = lessons_review['timestamp_to_request']
-            else:
-                last_checking_attempt = lessons_review['new_attempts'][0]
-                params['timestamp'] = lessons_review['last_attempt_timestamp']
-
-                send_checking_result(
-                    telegram_bot=telegram_bot,
-                    telegram_chat_id=telegram_chat_id,
-                    last_checking_attempt=last_checking_attempt
-                )
+            0/0
         except requests.exceptions.ReadTimeout:
             logging.warning('Нет ответа от сервера')
             continue
         except requests.exceptions.ConnectionError:
             logging.warning('Проблемы с подключением к интернету')
             sleep(time_to_sleep)
+        except Exception:
+            logging.exception()
 
 
 def main():
