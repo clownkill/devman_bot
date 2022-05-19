@@ -31,6 +31,13 @@ TELEGRAM_CHAT_ID=[ID]
 python main.py
 ```
 
+### Запуск с Docker
+Для запуска бота с помощью докера используйте:
+```
+docker build -t devman_bot .
+docker run --env-file ./.env devman_bot
+```
+
 ### Цель проекта
 
 Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [dvmn.org](https://dvmn.org).
