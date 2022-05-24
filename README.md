@@ -33,15 +33,19 @@ python main.py
 
 
 ### Запуск с Docker
-Для запуска бота с помощью докера используйте:
+Клонируйте репозиторий:
 ```
-docker build -t devman_bot .
-docker run --env-file ./.env devman_bot
+git clone https://github.com/clownkill/devman_bot
+```
+Для запуска бота с помощью докера используйте следующие комманды:
+```
+docker build -t [имя docker-контейнера] .
+docker run -d --env-file ./.env [имя docker-контейнера]
 ```
 
 ### Деплой
 
-Для деплоя проекта необходимо воспользоваться инструкцией на [heroku](https://devcenter.heroku.com/categories/deployment).
+Для деплоя проекта необходимо воспользоваться инструкцией на [heroku](https://devcenter.heroku.com/articles/build-docker-images-heroku-yml).
 
 
 ### Цель проекта
