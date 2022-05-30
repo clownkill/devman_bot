@@ -1,4 +1,4 @@
-# devman_bot
+o# devman_bot
  
 Скрипт для отслеживания статуса проверки отправленного на проверку урока на [dvmn.org](https://dvmn.org).
 
@@ -40,6 +40,14 @@ git clone https://github.com/clownkill/devman_bot
 Для запуска бота с помощью докера используйте следующие комманды:
 ```
 docker build -t [имя docker-контейнера] .
+```
+Перед запуском контейнера в одном каталоге с файлом `main.py` необходимо создать файл для хранения переменных окружения с именем `.env` со следующим содержимым:
+```
+DEVMAN_TOKEN=[TOKEN]
+TELEGRAM_TOKEN=[TOKEN]
+TELEGRAM_CHAT_ID=[ID]
+```
+```
 docker run -d --env-file ./.env [имя docker-контейнера]
 ```
 
